@@ -16,18 +16,20 @@ namespace backend.Controllers
         }
         [HttpGet]
 
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()//retriev all employees details
         {
             if (_employeeContext.Employees == null)
             {
                 return NotFound();
             }
-            return await _employeeContext.Employees.ToListAsync();
+            return await _employeeContext.Employees.ToListAsync(); //if error not found asynchronously-
+                                                                   //-retrieves the data from the database and-
+                                                                   //-returns them as a list of employees.
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}")] //single employee by calling the appropriate endpoint.
 
-        public async Task<ActionResult<Employee>> GetEmployees(int id)
+        public async Task<ActionResult<Employee>> GetEmployees(int id) 
         {
             if (_employeeContext.Employees == null)
             {
@@ -41,5 +43,59 @@ namespace backend.Controllers
 
             return employee;
         }
+
+        [HttpPost]
+
+        public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
+        {
+            _employeeContext.Employees.Add(employee);
+            await _employeeContext.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetEmployees), new { id = employee.ID }, employee);
+
+        }
+
+        [HttpPut("{id}")]
+
+        public async Task<ActionResult> PutEmployee(int id, Employee employee)
+        {
+            if(id != employee.ID)
+            {
+                return BadRequest();
+            }
+
+            _employeeContext.Entry(employee).State = EntityState.Modified;
+            try
+            {
+                await _employeeContext.SaveChangesAsync();
+            }
+            catch ( DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+
+        public async Task<ActionResult> DeleteEmployee(int id)
+        {
+            if (_employeeContext.Employees == null)
+            {
+                return NotFound();
+            }
+            var employee = await _employeeContext.Employees.FindAsync(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            _employeeContext.Employees.Remove(employee);
+            await _employeeContext.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }
+ 
