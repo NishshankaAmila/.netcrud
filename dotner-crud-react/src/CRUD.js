@@ -6,6 +6,10 @@
  import Row from 'react-bootstrap/Row';
  import Col from 'react-bootstrap/Col';
  import Container from 'react-bootstrap/Container';
+ import axios from "axios";
+ import { ToastContainer, toast  } from 'react-toastify';
+ import 'react-toastify/dist/ReactToastify.css';
+
  
  const CRUD = () => {
 
@@ -23,15 +27,27 @@
     const [editage,setEditAge] = useState('')
     const [editisActive,setEditIsActive] = useState(0)
 
-    const empdata = [...
+    const empdata = [
        
-    ]
+     ]
 
     const [data,setData] = useState([]);
 
+    
+
     useEffect(()=>{
-        setData(empdata);
+        getData();
     },[])
+
+    const getData = () =>{
+        axios.get('https://localhost:7266/api/Employee')
+        .then((result)=>{
+            setData(result.data)
+        })
+        .catch((error)=>{
+            console.log(error)
+        })
+    }
 
     const handelEdit = (id) =>{
        // alert(id);
@@ -49,9 +65,70 @@
 
     }
 
+    const handleSave = () =>{
+
+        const url = 'https://localhost:7266/api/Employee';
+
+        const data = {
+
+            
+            "name": name,
+            "age": age,
+            "isActive": isActive
+        }
+
+        axios.post(url,data)
+        .then((result)=>{
+            getData();
+            clear();
+            toast.success('Employee has been added -_-');
+        })
+    }
+
+    const clear = () =>{
+
+        setName('');
+        setAge('');
+        setIsActive(0);
+
+        setEditId('');
+        setEditName('');
+        setEditAge('');
+        setEditIsActive(0);
+    }
+
+    const handelActiveChange = (e) =>{
+
+        if(e.target.checked)
+        {
+            setIsActive(1);
+
+        }
+        else 
+        {
+            setIsActive(0);
+        }
+        
+    }
+
+    const handeEditlActiveChange = (e) =>{
+
+        if(e.target.checked)
+        {
+            setEditIsActive(1);
+
+        }
+        else 
+        {
+            setEditIsActive(0);
+        }
+        
+    }
+
    return (
      <Fragment>
         <br></br>
+        <ToastContainer/>
         <Container>
             <Row>
                 <Col>
@@ -65,11 +142,11 @@
                 <Col>
                 <input type="checkbox"
                 checked={isActive === 1 ? true : false}
-                onChange={(e)=> setIsActive(e)} value={isActive} />
+                onChange={(e)=> handelActiveChange(e)} value={isActive} />
                 <label>isActive</label>
                 </Col>
                 <Col>
-                <Button className="btn btn-primary">Submit</Button> 
+                <Button className="btn btn-primary" onClick={()=>handleSave()}>Submit</Button> 
                 </Col>
             </Row>
         </Container>
@@ -127,7 +204,7 @@
                 <Col>
                 <input type="checkbox"
                 checked={editisActive === 1 ? true : false}
-                onChange={(e)=> setEditIsActive(e)} value={editisActive} />
+                onChange={(e)=> handeEditlActiveChange(e)} value={editisActive} />
                 <label>isActive</label>
                 </Col>
                 
